@@ -1,12 +1,29 @@
 const books=['Genesis','Exodus','Leviticus','Numbers','Deuteronomy','Joshua','Judges','Ruth','1 Samuel','2 Samuel','1 Kings','2 Kings','1 Chronicles','2 Chronicles','Ezra','Nehemiah','Esther','Job','Psalms','Proverbs','Ecclesiastes','Song of Solomon','Isaiah','Jeremiah','Lamentations','Ezekiel','Daniel','Hosea','Joel','Amos','Obadiah','Jonah','Micah','Nahum','Habakkuk','Zephaniah','Haggai','Zechariah','Malachi','Matthew','Mark','Luke','John','Acts','Romans','1 Corinthians','2 Corinthians','Galatians','Ephesians','Philippians','Colossians','1 Thessalonians','2 Thessalonians','1 Timothy','2 Timothy','Titus','Philemon','Hebrews','James','1 Peter','2 Peter','1 John','2 John','3 John','Jude','Revelation'];
 const $=id=>document.getElementById(id),book=$('book'),chapter=$('chapter'),verses=$('verses'),status=$('status');
 books.forEach(b=>{let o=document.createElement('option');o.value=b;o.textContent=b;book.append(o)});
-let current=[],saved=[];try{saved=JSON.parse(localStorage.getItem('wg-saved')||'[]')}catch{}
+let current=[],saved=[],availableVoices=[];try{saved=JSON.parse(localStorage.getItem('wg-saved')||'[]')}catch{}
+const voiceSelect=$('voice');
+function loadVoices(){
+ if(!('speechSynthesis'in window))return;
+ availableVoices=speechSynthesis.getVoices();
+ const previous=voiceSelect.value;
+ voiceSelect.replaceChildren(new Option('Automatic (device default)',''));
+ const english=availableVoices.filter(v=>/^en(-|$)/i.test(v.lang));
+ // Put likely enhanced/natural voices first when the device exposes them.
+ const score=v=>/natural|neural|enhanced|premium|aria|jenny|guy|google us english/i.test(v.name)?1:0;
+ english.sort((a,b)=>score(b)-score(a));
+ english.forEach(v=>voiceSelect.add(new Option(`${v.name} (${v.lang})`,String(availableVoices.indexOf(v)))));
+ if(previous)voiceSelect.value=previous;
+}
+if('speechSynthesis'in window){loadVoices();speechSynthesis.onvoiceschanged=loadVoices;}
 function stop(){if('speechSynthesis'in window)speechSynthesis.cancel()}
 async function load(){stop();const b=book.value,c=Math.max(1,Number(chapter.value)||1);chapter.value=c;$('heading').textContent=`${b} ${c}`;status.textContent='';verses.textContent='Loading Scripture…';
 try{const r=await fetch(`https://bible-api.com/${encodeURIComponent(b+' '+c)}?translation=kjv`);if(!r.ok)throw Error('Could not load this chapter.');const d=await r.json();if(!d.verses?.length)throw Error('Chapter not found.');current=d.verses;verses.replaceChildren();current.forEach(v=>{const p=document.createElement('p');p.className='verse';const n=document.createElement('span');n.className='num';n.textContent=v.verse; p.append(n,document.createTextNode(v.text.trim()));verses.append(p)})}catch(e){current=[];verses.textContent='';status.textContent=e.message+' Check your internet connection and try again.'}}
 $('open').onclick=load;$('prev').onclick=()=>{if(+chapter.value>1){chapter.value=+chapter.value-1;load()}};$('next').onclick=()=>{chapter.value=+chapter.value+1;load()};book.onchange=()=>chapter.value=1;
-$('play').onclick=()=>{if(!current.length||!('speechSynthesis'in window)){status.textContent='Text-to-speech is not supported in this browser.';return}stop();const u=new SpeechSynthesisUtterance(current.map(v=>`Verse ${v.verse}. ${v.text}`).join(' '));u.rate=+$('speed').value;speechSynthesis.speak(u)};
+$('play').onclick=()=>{if(!current.length||!('speechSynthesis'in window)){status.textContent='Text-to-speech is not supported in this browser.';return}stop();const u=new SpeechSynthesisUtterance(current.map(v=>`Verse ${v.verse}. ${v.text}`).join(' '));u.rate=+$('speed').value;u.pitch=1;
+const selected=voiceSelect.value;
+if(selected!==''&&availableVoices[Number(selected)])u.voice=availableVoices[Number(selected)];
+speechSynthesis.speak(u)};
 $('pause').onclick=()=>{if(!('speechSynthesis'in window))return;if(speechSynthesis.paused)speechSynthesis.resume();else if(speechSynthesis.speaking)speechSynthesis.pause()};
 $('stop').onclick=stop;$('speed').oninput=()=>$('speedLabel').textContent=(+$('speed').value).toFixed(1)+'×';
 function renderSaved(){const el=$('saved');el.replaceChildren();if(!saved.length){el.textContent='No saved chapters yet.';return}saved.forEach((s,i)=>{const row=document.createElement('div');row.className='saved-row';const open=document.createElement('button');open.className='secondary';open.textContent=`${s.book} ${s.chapter}`;open.onclick=()=>{book.value=s.book;chapter.value=s.chapter;load()};const del=document.createElement('button');del.className='secondary';del.textContent='Remove';del.onclick=()=>{saved.splice(i,1);persist();renderSaved()};row.append(open,del);el.append(row)})}
