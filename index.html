@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#17130d">
+<meta name="description" content="Word of God — read and listen to the King James Bible.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>Word of God — KJV Bible</title>
+<style>
+:root{color-scheme:dark;--bg:#100f0d;--panel:#1b1915;--line:#393126;--gold:#d6aa57;--muted:#b7ad9d;--text:#f4efe5}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#282015 0,#100f0d 55%);color:var(--text);font:16px system-ui,-apple-system,Segoe UI,sans-serif}
+header{padding:30px 18px 24px;text-align:center;border-bottom:1px solid var(--line);background:#17130d}
+.logo{font-size:32px;color:var(--gold)}h1{font:700 25px Georgia,serif;letter-spacing:2px;color:var(--gold);margin:5px 0}.sub{font-size:11px;letter-spacing:3px;color:var(--muted)}
+main{max-width:850px;margin:22px auto;padding:0 14px 40px;display:grid;gap:15px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:17px}
+h2{font:600 18px Georgia,serif;color:var(--gold);margin:0 0 13px}
+.controls{display:grid;grid-template-columns:1fr 130px;gap:10px}
+label{font-size:13px;color:var(--muted)}select,input{width:100%;margin-top:6px;background:#11100e;color:var(--text);border:1px solid #51432c;border-radius:9px;padding:12px;font:inherit}
+button{border:0;border-radius:10px;background:#a87927;color:white;padding:11px 15px;font-weight:650;cursor:pointer}
+button.secondary{background:#29251e;border:1px solid #51432c;color:var(--text)}
+button:disabled{opacity:.45;cursor:default}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.actions button{flex:1;min-width:95px}
+#verses{font:19px/1.85 Georgia,serif}
+.verse{margin:0 0 13px}.num{color:var(--gold);font:700 13px system-ui;margin-right:8px}
+.muted{color:var(--muted);font-size:13px}.daily{font:italic 18px/1.7 Georgia,serif}
+#status{color:#e0a28c;font-size:13px;margin-top:10px;min-height:18px}
+#saved{display:grid;gap:8px}.saved-row{display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid var(--line);padding:7px 0}
+footer{text-align:center;color:#857b6b;font-size:12px;padding:8px}
+@media(max-width:520px){.controls{grid-template-columns:1fr 95px}header{padding-top:23px}h1{font-size:22px}#verses{font-size:18px}}
+</style>
+</head>
+<body>
+<header><div class="logo">✝</div><h1>WORD OF GOD</h1><div class="sub">KING JAMES VERSION</div></header>
+<main>
+<section class="panel">
+<h2>Choose your Scripture</h2>
+<div class="controls">
+<label>Book<select id="book"></select></label>
+<label>Chapter<input id="chapter" type="number" min="1" value="1"></label>
+</div>
+<div class="actions"><button id="open">Open chapter</button><button class="secondary" id="prev">← Previous</button><button class="secondary" id="next">Next →</button></div>
+</section>
+<section class="panel">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+<div><h2 id="heading" style="margin-bottom:4px">Genesis 1</h2><div class="muted">King James Version (KJV)</div></div>
+<button class="secondary" id="save">♡ Save chapter</button>
+</div>
+<div id="status" role="status"></div>
+<div id="verses">Loading Scripture…</div>
+<div class="actions"><button id="play">▶ Read aloud</button><button class="secondary" id="pause">Pause / Resume</button><button class="secondary" id="stop">Stop</button></div>
+<label style="display:block;margin-top:14px">Reading speed: <span id="speedLabel">1.0×</span><input id="speed" type="range" min=".6" max="1.8" step=".1" value="1"></label>
+</section>
+<section class="panel">
+<h2>Find a Scripture</h2>
+<input id="search" placeholder="Example: John 3:16">
+<div class="actions"><button id="searchBtn">Search Bible</button></div>
+</section>
+<section class="panel">
+<h2>Daily Scripture</h2>
+<div class="daily">“For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.”</div>
+<p class="muted" style="color:var(--gold)">John 3:16</p>
+</section>
+<section class="panel"><h2>My saved chapters</h2><div id="saved" class="muted">No saved chapters yet.</div></section>
+<footer>WORD OF GOD • KJV • Scripture text loads with an internet connection</footer>
+</main>
+<script src="app.js"></script>
+</body></html>
